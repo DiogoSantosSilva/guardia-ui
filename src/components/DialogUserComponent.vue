@@ -173,8 +173,22 @@ export default {
     submitForm () {
       if (this.isFormValid) {
         this.form.username = this.form.full_name
-        this.setDependent({ id: this.user.id, form: this.form }).then(() => {
+        this.setDependent(this.form).then(() => {
           this.closeDialog()
+          this.form = {
+            full_name: '',
+            username: '',
+            user_type: 1,
+            has_access: false,
+            email: '',
+            password: '',
+            age: null,
+            gender: '',
+            height: null,
+            weight: null,
+            bio: '',
+            imageUrl: ''
+          }
         })
       }
     },

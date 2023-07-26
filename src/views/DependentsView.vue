@@ -12,16 +12,17 @@
     <dialog-user-component v-model:dialog="openDialog"></dialog-user-component>
     <v-row class="mt-4">
       <v-col
-        v-for="(dependente, index) in dependentes"
+        v-for="(dependent, index) in dependents"
         :key="index"
         class="d-flex child-flex"
         cols="3"
       >
         <v-card>
-          <v-img @click="showInfo(dependente)"
+          <v-img
+            @click="selectedDependentUser(dependent)"
             :src="
-              dependente.imageUrl
-                ? dependente.imageUrl
+              dependent.imageUrl
+                ? dependent.imageUrl
                 : require('@/assets/baby.jpg')
             "
             class="align-end"
@@ -30,16 +31,32 @@
             width="300px"
             cover
           >
-          <v-card-title class="text-white">
-            {{ dependente.username }}
-          </v-card-title>
+            <v-card-title class="text-white">
+              {{ dependent.username }}
+            </v-card-title>
           </v-img>
           <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn size="small" color="surface-variant" variant="text" icon="mdi-note-plus"></v-btn>
-              <v-btn size="small" color="surface-variant" variant="text" icon="mdi-account-edit"></v-btn>
-              <v-btn size="small" color="surface-variant" variant="text" icon="mdi-delete" @click="deleteDependent(dependente.id)"></v-btn>
-            </v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              size="small"
+              color="surface-variant"
+              variant="text"
+              icon="mdi-note-plus"
+            ></v-btn>
+            <v-btn
+              size="small"
+              color="surface-variant"
+              variant="text"
+              icon="mdi-account-edit"
+            ></v-btn>
+            <v-btn
+              size="small"
+              color="surface-variant"
+              variant="text"
+              icon="mdi-delete"
+              @click="deleteDependent(dependent.id)"
+            ></v-btn>
+          </v-card-actions>
           <template v-slot:placeholder>
             <v-row class="fill-height ma-0" align="center" justify="center">
               <v-progress-circular
@@ -51,49 +68,63 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-container v-if="selectedDependent" class="px-0">
-      <v-card color="#f2f2f2">
-        <v-card-title class="text-h5">
-          {{ selectedDependent.username }}
-        </v-card-title>
-        <v-card-text class="mt-4">
-          <v-row>
-            <v-col cols="3">
-              <span
-                ><b>Idade</b>: {{ selectedDependent?.age || "Sem Informação" }}
-              </span>
-            </v-col>
-            <v-col cols="3">
-              <span
-                ><b>Sexo</b>:
-                {{ selectedDependent?.age || "Sem Informação" }}</span
-              >
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="3">
-              <span
-                ><b>Altura</b>:
-                {{ selectedDependent.height || "Sem Informação" }}</span
-              >
-            </v-col>
-            <v-col cols="3">
-              <span
-                ><b>Peso</b>:
-                {{ selectedDependent?.weight || "Sem Informação" }}</span
-              >
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12">
-              <b>Informações adicionais:</b>
-              <br />
-              <span> {{ selectedDependent?.bio || "Sem Informação" }}</span>
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-    </v-container>
+
+    <v-expand-transition>
+      <v-container v-if="selectedDependent" class="px-0">
+        <v-card color="#f2f2f2" v-show="extend">
+          <v-card-title class="text-h5">
+            {{ selectedDependent.username }}
+          </v-card-title>
+          <v-card-text class="mt-4">
+            <v-row>
+              <v-col cols="3">
+                <span
+                  ><b>Idade</b>:
+                  {{ selectedDependent?.profile?.age || "Sem Informação" }}
+                </span>
+              </v-col>
+              <v-col cols="3">
+                <span
+                  ><b>Sexo</b>:
+                  {{
+                    selectedDependent?.profile?.age || "Sem Informação"
+                  }}</span
+                >
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="3">
+                <span
+                  ><b>Altura</b>:
+                  {{
+                    selectedDependent?.profile?.height || "Sem Informação"
+                  }}</span
+                >
+              </v-col>
+              <v-col cols="3">
+                <span
+                  ><b>Peso</b>:
+                  {{
+                    selectedDependent?.profile?.weight || "Sem Informação"
+                  }}</span
+                >
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <b>Informações adicionais:</b>
+                <br />
+                <span>
+                  {{
+                    selectedDependent?.profile?.bio || "Sem Informação"
+                  }}</span
+                >
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </v-expand-transition>
   </div>
 </template>
 
@@ -107,19 +138,23 @@ export default {
   },
   data () {
     return {
-      selectedDependent: null,
       openDialog: false
     }
   },
-  computed: mapState(['user', 'dependentes']),
+  computed: {
+    ...mapState(['user', 'dependents', 'selectedDependent']),
+    extend () {
+      return this.selectedDependent !== null
+    }
+  },
   methods: {
-    ...mapActions(['deleteDependent']),
-    showInfo (dependente) {
-      this.selectedDependent = dependente
-    },
+    ...mapActions(['deleteDependent', 'selectedDependentUser']),
     dialogVisible () {
       this.openDialog = true
     }
+  },
+  beforeCreate () {
+    this.$store.dispatch('setUserDependent')
   }
 }
 </script>

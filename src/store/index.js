@@ -4,10 +4,8 @@ import axios from 'axios'
 export default createStore({
   state: {
     user: null,
-    dependentes: [
-      { id: 1, username: 'Diogo Garcia', imageUrl: null, tipo: 'Dependente' },
-      { id: 2, username: 'Bruna Garcia', imageUrl: '', tipo: 'Dependente' }
-    ],
+    selectedDependent: null,
+    dependents: null,
     record: null
   },
   mutations: {
@@ -23,16 +21,24 @@ export default createStore({
       location.reload()
     },
     SET_DEPENDENT_DATA (state, dependent) {
-      state.dependentes.push(dependent)
+      if (state.dependents) {
+        state.dependents.push(dependent)
+      } else {
+        state.dependents = dependent
+      }
     },
     REMOVE_DEPENDENT_DATA (state, dependentId) {
-      state.dependentes = state.dependentes.filter(dependent => dependent.id !== dependentId)
+      state.dependents = state.dependents.filter(dependent => dependent.id !== dependentId)
+      state.selectedDependent = null
     },
     EDIT_DEPENDENT_DATA (state, dependent) {
-      state.dependentes.push(dependent)
+      state.dependents.push(dependent)
     },
     SET_RECORDS_DATA (state) {
       console.log()
+    },
+    SET_SELECTED_USER (state, dependent) {
+      state.selectedDependent = dependent
     }
   },
   actions: {
@@ -43,22 +49,30 @@ export default createStore({
     },
     async login ({ commit }, credentials) {
       await axios.post('//localhost:8000/login', credentials).then((response) => {
-        console.log(response.data)
         commit('SET_USER_DATA', response.data)
       })
     },
-    setDependent ({ commit }, payload) {
-      // axios.get(`//localhost:8000/users/${resonsibleId}/dependents`).then((data) => {
-      //   commit('SET_DEPENDENTS_DATA', data)
-      // })
-      console.log(payload.form, 'aqui')
-      commit('SET_DEPENDENT_DATA', payload.form)
+    setDependent ({ commit }, dependent) {
+      axios.post(`//localhost:8000/users/${this.state.user.id}/dependents`, dependent).then((response) => {
+        console.log(response.data)
+        commit('SET_DEPENDENT_DATA', response.data)
+      })
     },
     logout ({ commit }) {
       commit('CLEAR_USER_DATA')
     },
     deleteDependent ({ commit }, dependentId) {
-      commit('REMOVE_DEPENDENT_DATA', dependentId)
+      axios.delete(`//localhost:8000/users/${this.state.user.id}/dependents/${dependentId}`).then(() => {
+        commit('REMOVE_DEPENDENT_DATA', dependentId)
+      })
+    },
+    selectedDependentUser ({ commit }, dependent) {
+      commit('SET_SELECTED_USER', dependent)
+    },
+    setUserDependent ({ commit }) {
+      axios.get(`//localhost:8000/users/${this.state.user.id}`).then((response) => {
+        commit('SET_DEPENDENT_DATA', response.data.dependents)
+      })
     },
     editDependent ({ commit }, dependent) {
       console.log()
