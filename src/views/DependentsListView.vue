@@ -5,11 +5,15 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon @click="dialogVisible()">
+      <v-btn icon @click="dialogUserVisible()">
         <v-icon>mdi-account-plus</v-icon>
       </v-btn>
     </v-toolbar>
     <dialog-user-component v-model:dialog="openDialog"></dialog-user-component>
+    <dialog-record-component
+      v-model:dialog="openRecordDialog"
+      :user="selectUser"
+    ></dialog-record-component>
     <v-row class="mt-4">
       <v-col
         v-for="(dependent, index) in dependents"
@@ -36,26 +40,47 @@
             </v-card-title>
           </v-img>
           <v-card-actions>
+            <span><b>Idade</b>: {{ dependent.profile.age }}</span>
             <v-spacer></v-spacer>
-            <v-btn
-              size="small"
-              color="surface-variant"
-              variant="text"
-              icon="mdi-note-plus"
-            ></v-btn>
-            <v-btn
-              size="small"
-              color="surface-variant"
-              variant="text"
-              icon="mdi-account-edit"
-            ></v-btn>
-            <v-btn
-              size="small"
-              color="surface-variant"
-              variant="text"
-              icon="mdi-delete"
-              @click="deleteDependent(dependent.id)"
-            ></v-btn>
+            <v-tooltip location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small"
+                  color="surface-variant"
+                  variant="text"
+                  icon="mdi-note-plus"
+                  @click="dialogRecordVisible(dependent)"
+                ></v-btn>
+              </template>
+              <span>Criacao rapida de registro</span>
+            </v-tooltip>
+            <v-tooltip location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small"
+                  color="surface-variant"
+                  variant="text"
+                  icon="mdi-eye"
+                  :to="{ name: 'dependent', params: { id: dependent?.id } }"
+                ></v-btn>
+              </template>
+              <span>Visualizar dependente</span>
+            </v-tooltip>
+            <v-tooltip location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small"
+                  color="surface-variant"
+                  variant="text"
+                  icon="mdi-delete"
+                  @click="deleteDependent(dependent.id)"
+                ></v-btn>
+              </template>
+              <span>Deletar dependente</span>
+            </v-tooltip>
           </v-card-actions>
           <template v-slot:placeholder>
             <v-row class="fill-height ma-0" align="center" justify="center">
@@ -129,28 +154,38 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import DialogUserComponent from '@/components/DialogUserComponent.vue'
+import DialogRecordComponent from '@/components/DialogRecordComponent.vue'
+
 export default {
   name: 'DependentsView',
   components: {
-    DialogUserComponent
+    DialogUserComponent,
+    DialogRecordComponent
   },
   data () {
     return {
-      openDialog: false
+      openDialog: false,
+      openRecordDialog: false,
+      selectUser: null
     }
   },
   computed: {
-    ...mapState(['user', 'dependents', 'selectedDependent']),
+    ...mapState(['user', 'selectedDependent']),
+    ...mapGetters(['dependents']),
     extend () {
       return this.selectedDependent !== null
     }
   },
   methods: {
     ...mapActions(['deleteDependent', 'selectedDependentUser']),
-    dialogVisible () {
+    dialogUserVisible () {
       this.openDialog = true
+    },
+    dialogRecordVisible (dependent) {
+      this.openRecordDialog = true
+      this.selectUser = dependent
     }
   },
   beforeCreate () {

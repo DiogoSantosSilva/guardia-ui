@@ -5,6 +5,8 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
 import axios from 'axios'
+import VCalendar from 'v-calendar'
+import 'v-calendar/style.css'
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8000/'
@@ -16,6 +18,7 @@ const app = createApp(App)
   .use(router)
   .use(store)
   .use(vuetify)
+  .use(VCalendar)
   .provide('$http', axiosInstance)
 
 app.mixin({

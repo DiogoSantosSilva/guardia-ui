@@ -1,12 +1,13 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
+import RecordService from '@/services/RecordService'
 
 export default createStore({
   state: {
     user: null,
     selectedDependent: null,
     dependents: null,
-    record: null
+    records: []
   },
   mutations: {
     SET_USER_DATA (state, userData) {
@@ -20,12 +21,11 @@ export default createStore({
       axios.defaults.headers.common.Autorization = null
       location.reload()
     },
-    SET_DEPENDENT_DATA (state, dependent) {
-      if (state.dependents) {
-        state.dependents.push(dependent)
-      } else {
-        state.dependents = dependent
-      }
+    SET_DEPENDENTS_DATA (state, dependents) {
+      state.dependents = dependents
+    },
+    SET_NEW_DEPENDENT_DATA (state, dependent) {
+      state.dependents.push(dependent)
     },
     REMOVE_DEPENDENT_DATA (state, dependentId) {
       state.dependents = state.dependents.filter(dependent => dependent.id !== dependentId)
@@ -34,8 +34,14 @@ export default createStore({
     EDIT_DEPENDENT_DATA (state, dependent) {
       state.dependents.push(dependent)
     },
-    SET_RECORDS_DATA (state) {
-      console.log()
+    SET_RECORD_DATA (state, record) {
+      state.records.push(record)
+    },
+    SET_RECORDS_DATA (state, records) {
+      state.records = records
+    },
+    REMOVE_RECORD_DATA (state, recordId) {
+      state.records = state.records.filter(record => record.id !== recordId)
     },
     SET_SELECTED_USER (state, dependent) {
       state.selectedDependent = dependent
@@ -54,8 +60,7 @@ export default createStore({
     },
     setDependent ({ commit }, dependent) {
       axios.post(`//localhost:8000/users/${this.state.user.id}/dependents`, dependent).then((response) => {
-        console.log(response.data)
-        commit('SET_DEPENDENT_DATA', response.data)
+        commit('SET_NEW_DEPENDENT_DATA', response.data)
       })
     },
     logout ({ commit }) {
@@ -71,25 +76,48 @@ export default createStore({
     },
     setUserDependent ({ commit }) {
       axios.get(`//localhost:8000/users/${this.state.user.id}`).then((response) => {
-        commit('SET_DEPENDENT_DATA', response.data.dependents)
+        commit('SET_DEPENDENTS_DATA', response.data.dependents)
       })
     },
     editDependent ({ commit }, dependent) {
       console.log()
     },
-    createRecord ({ commit }, dependent) {
-      console.log()
+    createRecord ({ commit }, record) {
+      RecordService.postRecord(record).then(
+        response => {
+          commit('SET_RECORD_DATA', response.data)
+        }
+      )
     },
-    deleteRecord ({ commit }, dependent) {
-      console.log()
+    getRecords ({ commit }, userId) {
+      axios.get(`//localhost:8000/users/${this.state.user.id}`).then((response) => {
+        const idList = response.data.dependents.map(item => item.id)
+        RecordService.getRecords(idList).then(
+          response => {
+            console.log(response.data)
+            commit('SET_RECORDS_DATA', response.data)
+          }
+        )
+      })
     },
-    editRecord ({ commit }, dependent) {
+    deleteRecord ({ commit }, recordId) {
+      RecordService.deleteRecord(recordId).then(() => {
+        commit('REMOVE_RECORD_DATA', recordId)
+      })
+    },
+    editRecord ({ commit }, record) {
       console.log()
     }
   },
   getters: {
     loggedIn (state) {
       return !!state.user
+    },
+    dependents (state) {
+      return state.dependents
+    },
+    records (state) {
+      return state.records
     }
   }
 })

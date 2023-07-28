@@ -1,8 +1,9 @@
 import axios from 'axios'
 
+// servico de exemplo
 const apiClient = axios.create({
   baseURL: 'http://localhost:8080',
-  withCredentials: false, // This is the default
+  withCredentials: false,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json'
@@ -10,13 +11,18 @@ const apiClient = axios.create({
 })
 
 export default {
-  getRrcords () {
-    return apiClient.get('/records')
+  getRecords (userIds) {
+    const queryParams = new URLSearchParams()
+    userIds.forEach(id => queryParams.append('user_ids', id))
+    return apiClient.get('/records?' + queryParams.toString())
   },
   getRecord (recordId) {
     return apiClient.get(`/records/${recordId}`)
   },
-  postRecord (event) {
-    return apiClient.post('/records', event)
+  postRecord (record) {
+    return apiClient.post('/records', record)
+  },
+  deleteRecord (recordId) {
+    return apiClient.delete(`/records/${recordId}`)
   }
 }

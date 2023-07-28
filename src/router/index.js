@@ -2,7 +2,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SignupView from '../views/SignupView.vue'
 import LoginView from '../views/LoginView.vue'
-import DependentsView from '../views/DependentsView.vue'
+import DependentsListView from '../views/DependentsListView.vue'
+import DependentView from '../views/DependentView.vue'
 import RecordsView from '../views/RecordsView.vue'
 
 const routes = [
@@ -16,7 +17,13 @@ const routes = [
       {
         path: 'dependents',
         name: 'dependents',
-        component: DependentsView
+        component: DependentsListView,
+        children: []
+      },
+      {
+        path: 'dependents/:id',
+        name: 'dependent',
+        component: DependentView
       },
       {
         path: 'records',

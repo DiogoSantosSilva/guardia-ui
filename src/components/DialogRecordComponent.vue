@@ -7,101 +7,78 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-              <v-form ref="form" @submit.prevent="submitForm">
-                <v-row>
-                  <v-col cols="12">
-                    <v-text-field
-                      v-model="form.full_name"
-                      label="Nome completo"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-
-                <v-row>
-                  <v-col cols="12">
-                    <v-checkbox
-                      v-model="form.has_access"
-                      label="Tem acesso?"
-                      @change="clearOptionalFields"
-                    ></v-checkbox>
-                  </v-col>
-                </v-row>
-
-                <v-row v-if="form.has_access">
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="form.email"
-                      label="E-mail"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="form.password"
-                      label="Senha"
-                      :type="showPassword ? 'text' : 'password'"
-                      :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                      @click:append="showPassword = !showPassword"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="form.age"
-                      label="Idade"
-                      type="number"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-select
-                      v-model="form.gender"
-                      :items="genderOptions"
-                      label="Gênero"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="form.height"
-                      label="Altura (cm)"
-                      type="number"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="form.weight"
-                      label="Peso (kg)"
-                      type="number"
-                      step="0.1"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-
-                <v-row>
-                  <v-col cols="12">
-                    <v-textarea v-model="form.bio" label="Informações gerais"></v-textarea>
-                  </v-col>
-                </v-row>
-              </v-form>
+            <v-form @submit.prevent="submitForm">
+              <v-row>
+                <v-col cols="12" sm="12">
+                  <v-text-field
+                    v-model="formData.titulo"
+                    label="Título"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="formData.mensagem"
+                    label="Mensagem"
+                    required
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="formData.topico"
+                    label="Tópico"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="formData.tag"
+                    label="Tag"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="formData.tipo_registro"
+                    :items="tiposDeRegistro"
+                    label="Tipo de Registro"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="formData.data"
+                    label="Data"
+                    v-mask="'##/##/####'"
+                    placeholder="dd/mm/yyyy"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="blue-darken-1"
+                  variant="text"
+                  @click="closeDialog()"
+                  >Close</v-btn
+                >
+                <v-btn
+                  type="submit"
+                  :disabled="!isFormValid"
+                  color="blue-darken-1"
+                  variant="text"
+                  >Save</v-btn
+                >
+              </v-card-actions>
+            </v-form>
           </v-container>
-          <small>*indicates required field</small>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="closeDialog()">
-            Close
-          </v-btn>
-          <v-btn color="blue-darken-1" variant="text"> Save </v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-row>
@@ -112,28 +89,26 @@ export default {
   props: {
     dialog: {
       type: Boolean,
-      default: false
+      default: false,
+      required: true
+    },
+    user: {
+      required: true
     }
   },
   data () {
     return {
       dialogVisible: false,
-      form: {
-        full_name: '',
-        username: this.full_name,
-        user_type: 1,
-        has_access: false,
-        email: '',
-        password: '',
-        age: null,
-        gender: '',
-        height: null,
-        weight: null,
-        bio: ''
+      formData: {
+        user_id: '',
+        titulo: '',
+        mensagem: '',
+        topico: '',
+        tag: '',
+        tipo_registro: '',
+        data: ''
       },
-      showPassword: false,
-      userTypeOptions: [1, 2, 3],
-      genderOptions: ['M', 'F']
+      tiposDeRegistro: ['Consulta Médica', 'Diversão', 'Tarefas', 'Outros']
     }
   },
   watch: {
@@ -147,16 +122,36 @@ export default {
       this.$emit('update:dialog', false)
     },
     submitForm () {
-      if (this.$refs.form.validate()) {
-        // Process form submission here
-        console.log('Form submitted successfully!')
+      if (this.isFormValid) {
+        this.formData.user_id = this.selectedUserId
+        this.$store.dispatch('createRecord', this.formData).then(() => {
+          this.closeDialog()
+          this.formData = {
+            user_id: '',
+            titulo: '',
+            mensagem: '',
+            topico: '',
+            tag: '',
+            tipo_registro: ''
+          }
+        })
       }
+    }
+  },
+  computed: {
+    isFormValid () {
+      // Check if all the required fields have valid values
+      const requiredFields = [
+        this.formData.titulo,
+        this.formData.mensagem,
+        this.formData.topico,
+        this.formData.tag,
+        this.formData.tipo_registro
+      ]
+      return requiredFields.every((field) => !!field)
     },
-    clearOptionalFields () {
-      if (!this.has_access) {
-        this.email = ''
-        this.password = ''
-      }
+    selectedUserId () {
+      return this.user.id
     }
   }
 }
